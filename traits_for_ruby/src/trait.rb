@@ -10,16 +10,35 @@ class Module
     sus_metodos.concat mis_metodos
 
     for i in 0...sus_metodos.length
-      unModulo.send(:define_method,sus_metodos[i].to_s) do
+      unModulo.send(:define_method, sus_metodos[i]) do
           if(conflictivos.include? sus_metodos[i])
             raise 'Metodos conflictivos'
-          elsif
-            trait.method(sus_metodos[i]).call
+          elsif(mis_metodos.include? sus_metodos[i])
+            #self.method(sus_metodos[i]).call
+          else
+            #trait.method(sus_metodos[i]).call
           end
       end
     end
 
     unModulo
+  end
+
+  def -(a_method)
+    a_module = Module.new
+
+    my_methods = instance_methods(false)
+    the_method = []
+    the_method << a_method
+
+    my_methods -= the_method
+
+    for i in 0...my_methods.length
+      a_module.send(:define_method, my_methods[i])do
+        self.method(my_methods[i])
+      end
+    end
+    a_module
   end
 end
 
