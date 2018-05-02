@@ -1,24 +1,26 @@
 require_relative 'class'
 
 module Algebra
-  def default_strategy(new_module, trait, mis_metodos, sus_metodos)
+ def default_strategy(new_module, trait, mis_metodos, sus_metodos)
     conflictivos = mis_metodos & sus_metodos
     sus_metodos -= conflictivos
     mis_metodos -= conflictivos
 
     new_module_methods = conflictivos + sus_metodos + mis_metodos
 
-
+    hash = {}
 
     new_module_methods.each do |metodo|
       if conflictivos.include? metodo
-
+        hash[metodo] = proc {|*args| raise 'Metodo conflictivo' }
       elsif mis_metodos.include? metodo
-        new_module.send(:define_method, metodo, instance_method(metodo))
+        hash[metodo] = instance_method(metodo)
       else
-        new_module.send(:define_method, metodo, trait.instance_method(metodo))
+        hash[metodo] = trait.instance_method(metodo)
       end
     end
+
+    hash
 
   end
 
@@ -28,7 +30,12 @@ module Algebra
     mis_metodos = instance_methods(false)
     sus_metodos = trait.instance_methods(false)
 
-    default_strategy unModulo, trait, mis_metodos, sus_metodos
+    hash = default_strategy unModulo, trait, mis_metodos, sus_metodos
+
+    nombres_metodos=hash.keys
+    nombres_metodos.each do |metodo|
+      unModulo.send(:define_method,metodo,hash[metodo])
+    end
 
     unModulo
   end
