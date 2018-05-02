@@ -1,27 +1,34 @@
 require_relative 'class'
 
 module Algebra
+  def default_strategy(new_module, trait, mis_metodos, sus_metodos)
+    conflictivos = mis_metodos & sus_metodos
+    sus_metodos -= conflictivos
+    mis_metodos -= conflictivos
+
+    new_module_methods = conflictivos + sus_metodos + mis_metodos
+
+
+
+    new_module_methods.each do |metodo|
+      if conflictivos.include? metodo
+
+      elsif mis_metodos.include? metodo
+        new_module.send(:define_method, metodo, instance_method(metodo))
+      else
+        new_module.send(:define_method, metodo, trait.instance_method(metodo))
+      end
+    end
+
+  end
+
   def +(trait)
     unModulo = Module.new
 
     mis_metodos = instance_methods(false)
     sus_metodos = trait.instance_methods(false)
 
-    conflictivos = mis_metodos & sus_metodos
-    sus_metodos -= conflictivos
-
-    sus_metodos.each do |metodo|
-      unModulo.send(:define_method, metodo.to_s) do
-        if conflictivos.include? metodo
-          #Lanzar excepcion
-          proc {|*args| raise 'Metodo conflictivo' }
-        elsif mis_metodos.include? metodo
-          # send(method(sus_metodos[i]).to_s)
-        else
-          trait.send method(metodo).to_s
-        end
-      end
-    end
+    default_strategy unModulo, trait, mis_metodos, sus_metodos
 
     unModulo
   end
@@ -43,32 +50,31 @@ module Algebra
 end
 
 class Trait
-  def self.define(name, methods_name, behaviour)
+  def self.define(name, method_map_hash)
     Object.const_set name, Module.new
     Kernel.const_get(name).singleton_class.include(Algebra)
-    i = 0
-    methods_name.each do |method|
-      Kernel.const_get(name).send(:define_method, method, &behaviour[i])
-      i += 1
+    methods_key = method_map_hash.keys
+    methods_key.each do |method|
+      Kernel.const_get(name).send(:define_method, method, method_map_hash[method])
     end
   end
 
 end
 
 name = :I
-Trait.define name, [:w,:r],[proc {puts "hola"},proc {puts "asd"}]
+Trait.define name, {:w => proc {puts "hola"}, :r => proc {puts "asd"}}
 
 name2 = :J
-Trait.define name2, [:p,:r],[proc {puts "chau"},proc {puts "asddd"}]
+Trait.define name2, {:p => proc {puts "chau"}, :r=>proc {puts "asddd"}}
 
 class A
-  uses I - :r
+  uses I + J
 end
 
 a_class = A.new
 
 puts a_class.methods.to_s
 
-
+a_class.p
 
 
