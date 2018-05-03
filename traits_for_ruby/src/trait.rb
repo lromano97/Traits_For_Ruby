@@ -1,7 +1,7 @@
 require_relative 'class'
 
 module Algebra
- def default_strategy(new_module, trait, mis_metodos, sus_metodos)
+  def default_strategy(new_module, trait, mis_metodos, sus_metodos)
     conflictivos = mis_metodos & sus_metodos
     sus_metodos -= conflictivos
     mis_metodos -= conflictivos
@@ -54,6 +54,16 @@ module Algebra
     end
     a_module
   end
+
+  def <<(un_mapa)
+  method_to_change = un_mapa.keys
+    method_to_change.each do |method|
+      self.define_method(un_mapa[method],self.instance_method(method))
+      puts self.methods.to_s
+    end
+    self
+  end
+
 end
 
 class Trait
@@ -74,14 +84,11 @@ Trait.define name, {:w => proc {puts "hola"}, :r => proc {puts "asd"}}
 name2 = :J
 Trait.define name2, {:p => proc {puts "chau"}, :r=>proc {puts "asddd"}}
 
-class A
-  uses I + J
+class A uses I << (:r > :hola)
 end
 
 a_class = A.new
 
 puts a_class.methods.to_s
 
-a_class.p
-
-
+puts a_class.hola.to_s
