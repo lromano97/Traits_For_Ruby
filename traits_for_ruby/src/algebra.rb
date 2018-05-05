@@ -55,8 +55,15 @@ module Algebra
 
   def <<(a_map)
     method_to_change = a_map.keys
+
     method_to_change.each do |method|
-      send(:define_method, a_map[method], self.instance_method(method))
+      if self.instance_methods.include? a_map[method]
+        raise RuntimeError, 'Alias posee el mismo nombre que otro metodo existente'
+      elsif self.instance_methods.include? method
+        send(:define_method, a_map[method], self.instance_method(method))
+      else
+        raise NoMethodError, 'No existe el metodo'
+      end
     end
     self
   end
