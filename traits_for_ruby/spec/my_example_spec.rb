@@ -2,17 +2,17 @@ require_relative '../src/trait'
 
 describe 'trait' do
 
-  it 'Renombrar con nombres de simbolos existentes' do
-    Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Sexo" + "Anal" + una_palabra}, :metodoB => proc{2+2}}
-
-    class UnaClase
-      uses  UnTraitorazo << (:metodoB > :metodoA)
-    end
-
-    objeto = UnaClase.new
-
-    expect{objeto.metodoA}.equal?(4)
-  end
+  # it 'Renombrar con nombres de simbolos existentes' do
+  #  Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Sexo" + "Anal" + una_palabra}, :metodoB => proc{2+2}}
+  #
+  # class UnaClase
+  #   uses  UnTraitorazo << (:metodoB > :metodoA)
+  # end
+  #
+  # objeto = UnaClase.new
+  #
+  # expect{objeto.metodoA}.to raise_error(RuntimeError)
+  # end
 
   it 'add a trait to a class' do
 
