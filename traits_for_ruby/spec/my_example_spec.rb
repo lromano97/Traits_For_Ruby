@@ -2,6 +2,18 @@ require_relative '../src/trait'
 
 describe 'trait' do
 
+  it 'Renombrar con nombres de simbolos existentes' do
+    Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Sexo" + "Anal" + una_palabra}, :metodoB => proc{2+2}}
+
+    class UnaClase
+      uses  UnTraitorazo << (:metodoB > :metodoA)
+    end
+
+    objeto = UnaClase.new
+
+    expect{objeto.metodoA}.equal?(4)
+  end
+
   it 'add a trait to a class' do
 
     Trait.define :MiTrait, {:metodo1 => proc{"Hola"}, :metodo2 => proc{|un_numero| un_numero * 0 + 42}}
@@ -32,6 +44,18 @@ describe 'trait' do
     expect(o.metodo3).equal?("zaraza")
     expect { o.metodo1 }.to raise_error(RuntimeError)
 
+  end
+
+  it 'Metodo no esta en el trait sustraccion' do
+    Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Sexo" + "Anal" + una_palabra}, :metodoB => proc{2+2}}
+
+    class UnaClase
+      uses  UnTraitorazo - :metodoC
+    end
+
+    objeto = UnaClase.new
+
+    expect{objeto.metodoC}.to raise_error(NoMethodError)
   end
 
   it 'symbol substraction of a class' do
