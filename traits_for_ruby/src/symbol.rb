@@ -1,6 +1,6 @@
 class Symbol
-  def >(nuevo_nombre)
-    mapa_del_orto = {self => nuevo_nombre}
-    mapa_del_orto
+  def >(new_name)
+    a_hash_map = {self => new_name}
+    a_hash_map
   end
 end

@@ -12,21 +12,4 @@ class Trait
       Kernel.const_get(name).send(:define_method, method, method_map_hash[method])
     end
   end
-
 end
-
-name = :I
-Trait.define name, {:w => proc {puts "hola"}, :r => proc {puts "asd"}}
-
-name2 = :J
-Trait.define name2, {:p => proc {puts "chau"}, :r=>proc {puts "asddd"}}
-
-class A
-  uses I << (:r > :hola)
-end
-
-a_class = A.new
-
-puts a_class.methods.to_s
-
-puts a_class.hola
