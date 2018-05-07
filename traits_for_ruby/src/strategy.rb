@@ -13,13 +13,24 @@ module Strategy
     end
   end
 
- def foldi(a_function, new_module, name_method, methods)
+  def foldi(a_function, new_module, name_method, methods)
     new_module.send(:define_method, name_method)do
       method_values = []
       methods.each do |method|
         method_values.push(method.call)
       end
       a_function.call method_values
+    end
+  end
+
+  def conditional_strategy(proc, new_module, name_method, methods)
+    new_module.send(:define_method, name_method) do
+      methods.each do |a_method|
+        if(proc.call(a_method.call))
+          a_method.call
+          break
+        end
+      end
     end
   end
 end
