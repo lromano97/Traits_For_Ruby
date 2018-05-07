@@ -13,14 +13,13 @@ module Strategy
     end
   end
 
-  def foldi(a_function, new_module, name_method, methods)
+ def foldi(a_function, new_module, name_method, methods)
     new_module.send(:define_method, name_method)do
-      a_value = methods[0].call
-      methods.delete(0)
+      method_values = []
       methods.each do |method|
-        a_value = method.call a_value
+        method_values.push(method.call)
       end
-      a_value
+      a_function.call method_values
     end
   end
 end
