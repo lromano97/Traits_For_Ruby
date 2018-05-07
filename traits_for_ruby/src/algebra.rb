@@ -2,6 +2,7 @@ module Algebra
   include Strategy
   def +(a_trait)
     new_trait = Module.new
+    new_trait.include Algebra
     my_methods = const_get(:Methods).clone
     its_methods = a_trait.const_get(:Methods).clone
     new_hash = my_methods.merge(its_methods){ |key, new_value, old_value|
@@ -15,6 +16,7 @@ module Algebra
     raise "El metodo no existe" unless
         const_get(:Methods).key? a_method
     new_trait = Module.new
+    new_trait.include Algebra
     new_hash = const_get(:Methods).clone
     new_trait.const_set :Methods, new_hash
     new_trait.const_get(:Methods).delete(a_method)
