@@ -12,7 +12,9 @@ class Class
       method = instance_method(:default_strategy)
       a_module.const_get(:Methods).each do |method_name, block|
         if block.is_a? Array
-          method.bind(self).call un_modulo,method_name,block
+          method.bind(self).call un_modulo, method_name, block
+        else
+          un_modulo.send :define_method, method_name, block
         end
       end
     else
@@ -21,16 +23,15 @@ class Class
         if value.include? method_name
           if key.is_a? Proc
             key.call un_modulo, method_name, block
-          elsif
-            key.is_a? Array
+          elsif key.is_a? Array
             method = instance_method(key[0])
-            method.bind(self).call key[1],un_modulo,method_name,block
+            method.bind(self).call key[1], un_modulo, method_name, block
           else
             method = instance_method(key)
             method.bind(self).call un_modulo, method_name, block
           end
         else
-          send(:define_method,method_name,block) unless block.is_a? Array
+          un_modulo.send(:define_method, method_name, block) unless block.is_a? Array
         end
         end
       end
