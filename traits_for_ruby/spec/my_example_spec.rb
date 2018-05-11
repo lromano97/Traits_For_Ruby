@@ -55,7 +55,7 @@ describe 'trait' do
 
     objeto = UnaClase.new
 
-    expect{objeto.metodoC}.to raise_error(NoMethodError)
+    expect{objeto.metodoC}.to raise_error(RuntimeError)
   end
 
   it 'symbol substraction of a class' do
@@ -84,4 +84,38 @@ describe 'trait' do
     expect(o.metodo1).equal?("Hola")
     expect(o.metodo2(84)).equal?(42)
   end
-end
+      
+   it 'execution of all conflicting messages' do
+    Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{puts "Zaraza"}}
+    Trait.define :MiOtroTrait, {:metodo2 => proc{puts "Hola mundo"}, :metodo3 => proc{puts "Deleted method"}}
+
+    class UnaClase
+      strategy ({:execute_all=>[:metodo2]})
+      uses MiTrait + MiOtroTrait
+    end
+
+
+    o = UnaClase.new
+    expect(o.metodo1).equal?("kawabonga")
+    expect(o.metodo2).equal?("Zaraza")
+    expect(o.metodo2).equal?("Hola mundo")
+    expect(o.metodo3).equal?("Deleted method")
+  end
+
+  it 'execute function analogous to the fold' do
+    Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{5}}
+    Trait.define :MiOtroTrait, {:metodo2 => proc{10}, :metodo3 => proc{puts "Deleted method"}}
+
+    class UnaClase
+      strategy ({[:foldi,proc{|x,y| puts (x+y)}]=>[:metodo2]})
+      uses MiTrait + MiOtroTrait
+    end
+
+
+    o = UnaClase.new
+    expect(o.metodo1).equal?("kawabonga")
+    expect(o.metodo2).equal?(15)
+    expect(o.metodo3).equal?("Deleted method")
+  end
+
+ end
