@@ -47,7 +47,7 @@ describe 'trait' do
   end
 
   it 'Metodo no esta en el trait sustraccion' do
-    Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Sexo" + "Anal" + una_palabra}, :metodoB => proc{2+2}}
+    Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Hola" + "Mundo" + una_palabra}, :metodoB => proc{2+2}}
 
     class UnaClase
       uses  UnTraitorazo - :metodoC
@@ -85,7 +85,7 @@ describe 'trait' do
     expect(o.metodo2(84)).equal?(42)
   end
       
-   it 'execution of all conflicting messages' do
+  it 'execution of all conflicting messages' do
     Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{puts "Zaraza"}}
     Trait.define :MiOtroTrait, {:metodo2 => proc{puts "Hola mundo"}, :metodo3 => proc{puts "Deleted method"}}
 
@@ -115,6 +115,22 @@ describe 'trait' do
     o = UnaClase.new
     expect(o.metodo1).equal?("kawabonga")
     expect(o.metodo2).equal?(15)
+    expect(o.metodo3).equal?("Deleted method")
+  end
+      
+  it 'resolving through a condition' do
+    Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{5}}
+    Trait.define :MiOtroTrait, {:metodo2 => proc{10}, :metodo3 => proc{puts "Deleted method"}}
+
+    class UnaClase
+      strategy({proc{|x| (x>6)}=>[:metodo2]})
+      uses MiTrait + MiOtroTrait
+    end
+
+
+    o = UnaClase.new
+    expect(o.metodo1).equal?("kawabonga")
+    expect(o.metodo2).equal?(10)
     expect(o.metodo3).equal?("Deleted method")
   end
 
