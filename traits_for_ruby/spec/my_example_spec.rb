@@ -1,22 +1,17 @@
 require_relative '../src/trait'
 
 describe 'trait' do
+  Trait.define :MiTrait, {:metodo1 => proc{"Hola"}, :metodo2 => proc{|un_numero| un_numero * 0 + 42}}
+  Trait.define :MiOtroTrait, {:metodo1 => proc {"kawabonga"}, :metodo3=>proc {"zaraza"}}
+  Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Hola" + "Mundo" + una_palabra}, :metodoB => proc{2+2}}
 
-  # it 'Renombrar con nombres de simbolos existentes' do
-  #  Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Sexo" + "Anal" + una_palabra}, :metodoB => proc{2+2}}
-  #
-  # class UnaClase
-  #   uses  UnTraitorazo << (:metodoB > :metodoA)
-  # end
-  #
-  # objeto = UnaClase.new
-  #
-  # expect{objeto.metodoA}.to raise_error(RuntimeError)
-  # end
+  #Traits for strategies
+  Trait.define :PrimerTraitStrategy, {:metodo1 => proc{'kawabonga'}, :metodo2 => proc{'Zaraza'}}
+  Trait.define :SegundoTraitStrategy, {:metodo2 => proc{'Hola mundo'}, :metodo3 => proc{'Deleted method'}}
+  Trait.define :TercerTraitStrategy, {:metodo1 => proc{'kawabonga'}, :metodo2 => proc{5}}
+  Trait.define :CuartoTraitStrategy, {:metodo2 => proc{10}, :metodo3 => proc{'Deleted method'}}
 
   it 'add a trait to a class' do
-
-    Trait.define :MiTrait, {:metodo1 => proc{"Hola"}, :metodo2 => proc{|un_numero| un_numero * 0 + 42}}
 
     class MiClase
       uses MiTrait
@@ -31,9 +26,6 @@ describe 'trait' do
   end
 
   it 'add two traits to a class' do
-    Trait.define :MiTrait, {:metodo1 => proc{"Hola"}, :metodo2 => proc{|un_numero| un_numero * 0 + 42}}
-    Trait.define :MiOtroTrait, {:metodo1 => proc {"kawabonga"}, :metodo3=>proc {"zaraza"}}
-
     class Conflicto
       uses MiTrait + MiOtroTrait
     end
@@ -47,21 +39,10 @@ describe 'trait' do
   end
 
   it 'Metodo no esta en el trait sustraccion' do
-    Trait.define :UnTraitorazo, {:metodoA => proc{|una_palabra| "Hola" + "Mundo" + una_palabra}, :metodoB => proc{2+2}}
-
-    class UnaClase
-      uses  UnTraitorazo - :metodoC
-    end
-
-    objeto = UnaClase.new
-
-    expect{objeto.metodoC}.to raise_error(RuntimeError)
+    expect {UnTraitorazo - :metodoC}.to raise_error(RuntimeError)
   end
 
   it 'symbol substraction of a class' do
-    Trait.define :MiTrait, {:metodo1 => proc{"Hola"}, :metodo2 => proc{|un_numero| un_numero * 0 + 42}}
-    Trait.define :MiOtroTrait, {:metodo1 => proc {"kawabonga"}, :metodo3=>proc {"zaraza"}}
-
     class TodoBienTodoLegal
       uses MiTrait + (MiOtroTrait - :metodo1)
     end
@@ -73,8 +54,6 @@ describe 'trait' do
   end
 
   it 'rename symbols' do
-    Trait.define :MiTrait, {:metodo1 => proc{"Hola"}, :metodo2 => proc{|un_numero| un_numero * 0 + 42}}
-
     class ConAlias
       uses MiTrait << (:metodo1 > :saludo)
     end
@@ -84,54 +63,48 @@ describe 'trait' do
     expect(o.metodo1).equal?("Hola")
     expect(o.metodo2(84)).equal?(42)
   end
-      
+
   it 'execution of all conflicting messages' do
-    Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{puts "Zaraza"}}
-    Trait.define :MiOtroTrait, {:metodo2 => proc{puts "Hola mundo"}, :metodo3 => proc{puts "Deleted method"}}
-
-    class UnaClase
+    class AClass
       strategy ({:execute_all=>[:metodo2]})
-      uses MiTrait + MiOtroTrait
+      uses PrimerTraitStrategy + SegundoTraitStrategy
     end
 
 
-    o = UnaClase.new
-    expect(o.metodo1).equal?("kawabonga")
-    expect(o.metodo2).equal?("Zaraza")
-    expect(o.metodo2).equal?("Hola mundo")
-    expect(o.metodo3).equal?("Deleted method")
+    o = AClass.new
+    expect(o.metodo1).equal?('kawabonga')
+    expect(o.metodo2).equal?('Zaraza')
+    expect(o.metodo2).equal?('Hola mundo')
+    expect(o.metodo3).equal?('Deleted method')
   end
 
-  it 'execute function analogous to the fold' do
-    Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{5}}
-    Trait.define :MiOtroTrait, {:metodo2 => proc{10}, :metodo3 => proc{puts "Deleted method"}}
-
-    class UnaClase
-      strategy ({[:foldi,proc{|x,y| puts (x+y)}]=>[:metodo2]})
-      uses MiTrait + MiOtroTrait
+  it 'execute function analogous to fold' do
+    class AnotherClass
+      strategy ({[:foldi,proc{|x,y| x+y}]=>[:metodo2]})
+      uses TercerTraitStrategy + CuartoTraitStrategy
     end
 
 
-    o = UnaClase.new
-    expect(o.metodo1).equal?("kawabonga")
+    o = AnotherClass.new
+    expect(o.metodo1).equal?('kawabonga')
     expect(o.metodo2).equal?(15)
-    expect(o.metodo3).equal?("Deleted method")
+    expect(o.metodo3).equal?('Deleted method')
   end
-      
-  it 'resolving through a condition' do
-    Trait.define :MiTrait, {:metodo1 => proc{"kawabonga"}, :metodo2 => proc{5}}
-    Trait.define :MiOtroTrait, {:metodo2 => proc{10}, :metodo3 => proc{puts "Deleted method"}}
 
-    class UnaClase
-      strategy({proc{|x| (x>6)}=>[:metodo2]})
-      uses MiTrait + MiOtroTrait
+  it 'resolving through a condition' do
+    class AAClas
+      strategy [proc{|a_module, method_name, blocks| a_module.send(:define_method, method_name)do
+        blocks[0].call+blocks[1].call>6
+      end}]=>[:metodo2]
+      uses TercerTraitStrategy + CuartoTraitStrategy
     end
 
 
-    o = UnaClase.new
-    expect(o.metodo1).equal?("kawabonga")
-    expect(o.metodo2).equal?(10)
-    expect(o.metodo3).equal?("Deleted method")
+    o = AAClas.new
+    expect(o.metodo1).equal?('kawabonga')
+    expect(o.metodo2).equal? true
+    expect(o.metodo3).equal?('Deleted method')
   end
+
 
  end

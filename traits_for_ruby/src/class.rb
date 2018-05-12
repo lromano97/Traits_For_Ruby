@@ -21,8 +21,8 @@ class Class
       const_get(:Strategy).each do |key,value|
         a_module.const_get(:Methods).each do |method_name, block|
         if value.include? method_name
-          if key.is_a? Proc
-            key.call un_modulo, method_name, block
+          if key[0].is_a? Proc
+            key[0].call un_modulo, method_name, block
           elsif key.is_a? Array
             method = instance_method(key[0])
             method.bind(self).call key[1], un_modulo, method_name, block
