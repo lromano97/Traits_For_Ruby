@@ -11,7 +11,11 @@ describe 'trait' do
   Trait.define :TercerTraitStrategy, {:metodo1 => proc{'kawabonga'}, :metodo2 => proc{5}}
   Trait.define :CuartoTraitStrategy, {:metodo2 => proc{10}, :metodo3 => proc{'Deleted method'}}
 
-  it 'add a trait to a class' do
+  it 'Alias de un metodo con el nombre de otro metodo' do
+    expect{MiTrait << (:metodo2 > :metodo1)}.to raise_error('El nombre del metodo ya existe')
+  end
+    
+    it 'add a trait to a class' do
 
     class MiClase
       uses MiTrait
