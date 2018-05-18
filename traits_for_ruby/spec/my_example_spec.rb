@@ -70,7 +70,7 @@ describe 'trait' do
 
   it 'execution of all conflicting messages' do
     class AClass
-      strategy ({:execute_all=>[:metodo2]})
+      strategy ({:ExecuteAllStrategy=>[:metodo2]})
       uses PrimerTraitStrategy + SegundoTraitStrategy
     end
 
@@ -84,7 +84,7 @@ describe 'trait' do
 
   it 'execute function analogous to fold' do
     class AnotherClass
-      strategy ({[:foldi,proc{|x,y| x+y}]=>[:metodo2]})
+      strategy ({:FoldStrategy=>[:metodo2, proc{|x,y| x+y}]})
       uses TercerTraitStrategy + CuartoTraitStrategy
     end
 
@@ -97,9 +97,7 @@ describe 'trait' do
 
   it 'resolving through a condition' do
     class AAClas
-      strategy [proc{|a_module, method_name, blocks| a_module.send(:define_method, method_name)do
-        blocks[0].call+blocks[1].call>6
-      end}]=>[:metodo2]
+      strategy ({:RandomStrategy=>[:metodo2, proc{|blocks| blocks[0].call+blocks[1].call>6}]})
       uses TercerTraitStrategy + CuartoTraitStrategy
     end
 
@@ -109,6 +107,5 @@ describe 'trait' do
     expect(o.metodo2).equal? true
     expect(o.metodo3).equal?('Deleted method')
   end
-
 
  end
